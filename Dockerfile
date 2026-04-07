@@ -242,6 +242,12 @@ RUN if [ -n "$OPENCLAW_INSTALL_DOCKER_CLI" ]; then \
 RUN ln -sf /app/openclaw.mjs /usr/local/bin/openclaw \
  && chmod 755 /app/openclaw.mjs
 
+# Railway entrypoint: auto-configures gateway.controlUi.allowedOrigins from
+# RAILWAY_PUBLIC_DOMAIN at container startup so the Control UI WebSocket
+# handshake is not rejected with "origin not allowed" on Railway deployments.
+COPY --chown=node:node scripts/railway-entrypoint.sh /app/scripts/railway-entrypoint.sh
+RUN chmod 755 /app/scripts/railway-entrypoint.sh
+
 ENV NODE_ENV=production
 
 # Security hardening: Run as non-root user

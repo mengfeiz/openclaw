@@ -55,6 +55,20 @@ Attach a volume mounted at:
 
 - `/data`
 
+### Start command
+
+Set the service start command to the Railway entrypoint script so that
+`gateway.controlUi.allowedOrigins` is automatically configured from
+`RAILWAY_PUBLIC_DOMAIN` before the gateway starts:
+
+```
+/app/scripts/railway-entrypoint.sh
+```
+
+This is a transparent wrapper: it patches the config file with the Railway
+HTTPS origin and then `exec`s the gateway. If `RAILWAY_PUBLIC_DOMAIN` is not
+set the script falls through to the normal gateway start unchanged.
+
 ### Variables
 
 Set these variables on the service:
