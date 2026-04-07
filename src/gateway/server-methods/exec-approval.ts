@@ -16,6 +16,7 @@ import {
   buildSystemRunApprovalEnvBinding,
 } from "../../infra/system-run-approval-binding.js";
 import { resolveSystemRunApprovalRequestContext } from "../../infra/system-run-approval-context.js";
+import { normalizeOptionalString } from "../../shared/string-coerce.js";
 import type { ExecApprovalManager } from "../exec-approval-manager.js";
 import {
   ErrorCodes,
@@ -93,6 +94,18 @@ export function createExecApprovalHandlers(
         undefined,
       );
     },
+    "exec.approval.list": async ({ respond }) => {
+      respond(
+        true,
+        manager.listPendingRecords().map((record) => ({
+          id: record.id,
+          request: record.request,
+          createdAtMs: record.createdAtMs,
+          expiresAtMs: record.expiresAtMs,
+        })),
+        undefined,
+      );
+    },
     "exec.approval.request": async ({ params, respond, context, client }) => {
       if (!validateExecApprovalRequestParams(params)) {
         respond(
@@ -131,9 +144,9 @@ export function createExecApprovalHandlers(
       const twoPhase = p.twoPhase === true;
       const timeoutMs =
         typeof p.timeoutMs === "number" ? p.timeoutMs : DEFAULT_EXEC_APPROVAL_TIMEOUT_MS;
-      const explicitId = typeof p.id === "string" && p.id.trim().length > 0 ? p.id.trim() : null;
-      const host = typeof p.host === "string" ? p.host.trim() : "";
-      const nodeId = typeof p.nodeId === "string" ? p.nodeId.trim() : "";
+      const explicitId = normalizeOptionalString(p.id) ?? null;
+      const host = normalizeOptionalString(p.host) ?? "";
+      const nodeId = normalizeOptionalString(p.nodeId) ?? "";
       const approvalContext = resolveSystemRunApprovalRequestContext({
         host,
         command: p.command,
