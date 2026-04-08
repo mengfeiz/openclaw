@@ -27,6 +27,24 @@ If `OPENCLAW_STATE_DIR=/data` and you do **not** set `OPENCLAW_CONFIG_PATH`, the
 
 Copy or merge `openclaw.json.example` there, then restart.
 
+## `pairing required` over WebSocket (Railway + browser)
+
+Behind Railway, the Control UI still presents **device identity**. Until that device is **paired**, the gateway returns **`1008 pairing required`**.
+
+**Option A – break-glass (typical for a token-gated HTTPS deploy):** set in config:
+
+- `gateway.controlUi.dangerouslyDisableDeviceAuth: true`
+
+This skips **device pairing** for the Control UI operator path. You **must** keep a **strong** `OPENCLAW_GATEWAY_TOKEN` and HTTPS; see [Control UI security](https://docs.openclaw.ai/web/control-ui).
+
+This example file includes that flag and **`gateway.trustedProxies`** (`100.64.0.0/10`) so logs stop warning about proxy headers from Railway’s internal addresses. Tighten the CIDR if your host documents a smaller range.
+
+**Option B – keep device pairing:** run on the gateway host (e.g. Railway shell):
+
+`openclaw pairing approve ...`
+
+using the code the UI shows (see [Pairing](https://docs.openclaw.ai/gateway/pairing)).
+
 ## Verify
 
 DevTools → Network → WS → request header `Origin:` must match an entry in `allowedOrigins`.

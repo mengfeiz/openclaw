@@ -1,9 +1,11 @@
 {
   "gateway": {
+    "trustedProxies": ["100.64.0.0/10"],
     "controlUi": {
       "allowedOrigins": [
         "https://openclaw-production-1cec.up.railway.app"
-      ]
+      ],
+      "dangerouslyDisableDeviceAuth": true
     }
   }
 }
