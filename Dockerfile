@@ -169,6 +169,11 @@ COPY --from=runtime-assets --chown=node:node /app/skills ./skills
 COPY --from=runtime-assets --chown=node:node /app/docs ./docs
 COPY --from=runtime-assets --chown=node:node /app/qa ./qa
 
+# Optional Railway / public-URL Control UI allowlist. To use it, set
+# OPENCLAW_CONFIG_PATH=/app/config/openclaw.railway.json in your orchestrator
+# (otherwise the default config path under OPENCLAW_STATE_DIR applies).
+COPY --chown=node:node deploy/railway/openclaw.json.example /app/config/openclaw.railway.json
+
 # Keep pnpm available in the runtime image for container-local workflows.
 # Use a shared Corepack home so the non-root `node` user does not need a
 # first-run network fetch when invoking pnpm.
