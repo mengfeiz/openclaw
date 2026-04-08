@@ -1,4 +1,9 @@
 {
+  "agents": {
+    "defaults": {
+      "model": "openai/gpt-5.4"
+    }
+  },
   "gateway": {
     "trustedProxies": ["100.64.0.0/10"],
     "controlUi": {

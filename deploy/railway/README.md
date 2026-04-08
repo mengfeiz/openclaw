@@ -2,6 +2,12 @@
 
 Use this when the browser shows: `origin not allowed`.
 
+## Default model without OpenCode
+
+This template sets **`agents.defaults.model`** to **`openai/gpt-5.4`**. Set **`OPENAI_API_KEY`** on Railway and ensure billing/quota is OK.
+
+To use **Anthropic** instead, change it to e.g. **`anthropic/claude-sonnet-4-6`** (or your chosen `anthropic/…` id) and set **`ANTHROPIC_API_KEY`**.
+
 ## Git push + image rebuild (recommended)
 
 The Docker image ships a template at:
