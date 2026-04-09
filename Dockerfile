@@ -242,6 +242,14 @@ RUN if [ -n "$OPENCLAW_INSTALL_DOCKER_CLI" ]; then \
 RUN ln -sf /app/openclaw.mjs /usr/local/bin/openclaw \
  && chmod 755 /app/openclaw.mjs
 
+# Railway deployment: copy the example config and the startup entrypoint.
+# The entrypoint patches gateway.controlUi.allowedOrigins at runtime using
+# the RAILWAY_PUBLIC_DOMAIN env var so WebSocket connections from the browser
+# are not rejected with "origin not allowed".
+COPY --chown=node:node deploy/railway/openclaw.json.example /app/config/openclaw.railway.json
+COPY --chown=node:node scripts/railway-entrypoint.sh /app/scripts/railway-entrypoint.sh
+RUN chmod 755 /app/scripts/railway-entrypoint.sh
+
 ENV NODE_ENV=production
 
 # Security hardening: Run as non-root user
@@ -261,6 +269,7 @@ USER node
 #   - GET /healthz (liveness) and GET /readyz (readiness)
 #   - aliases: /health and /ready
 # For external access from host/ingress, override bind to "lan" and set auth.
+# On Railway, the entrypoint script patches allowedOrigins before starting.
 HEALTHCHECK --interval=3m --timeout=10s --start-period=15s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
-CMD ["node", "openclaw.mjs", "gateway", "--allow-unconfigured"]
+CMD ["/app/scripts/railway-entrypoint.sh"]
