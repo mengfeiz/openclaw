@@ -174,6 +174,12 @@ COPY --from=runtime-assets --chown=node:node /app/qa ./qa
 # (otherwise the default config path under OPENCLAW_STATE_DIR applies).
 COPY --chown=node:node deploy/railway/openclaw.json.example /app/config/openclaw.railway.json
 
+# Railway startup entrypoint: patches allowedOrigins from RAILWAY_PUBLIC_DOMAIN
+# before starting the gateway. Safe to use in non-Railway deployments too —
+# the script is a no-op when Railway env vars are absent.
+COPY --chown=node:node scripts/railway-entrypoint.sh /app/scripts/railway-entrypoint.sh
+RUN chmod 755 /app/scripts/railway-entrypoint.sh
+
 # Keep pnpm available in the runtime image for container-local workflows.
 # Use a shared Corepack home so the non-root `node` user does not need a
 # first-run network fetch when invoking pnpm.
@@ -268,4 +274,7 @@ USER node
 # For external access from host/ingress, override bind to "lan" and set auth.
 HEALTHCHECK --interval=3m --timeout=10s --start-period=15s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:18789/healthz').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
-CMD ["node", "openclaw.mjs", "gateway", "--allow-unconfigured"]
+# On Railway, the entrypoint injects RAILWAY_PUBLIC_DOMAIN into
+# gateway.controlUi.allowedOrigins before exec-ing the gateway.
+# On non-Railway hosts the script is a transparent pass-through.
+CMD ["/app/scripts/railway-entrypoint.sh"]
