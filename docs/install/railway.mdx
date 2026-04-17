@@ -16,6 +16,7 @@ This is the easiest "no terminal on the server" path: Railway runs the Gateway f
 3. Set the required **Variables** (at least `OPENCLAW_GATEWAY_PORT` and `OPENCLAW_GATEWAY_TOKEN`).
 4. Enable **HTTP Proxy** on port `8080`.
 5. Open `https://<your-railway-domain>/openclaw` and connect using the configured shared secret. This template uses `OPENCLAW_GATEWAY_TOKEN` by default; if you replace it with password auth, use that password instead.
+6. Add your Railway domain to `gateway.controlUi.allowedOrigins` in the config (see [Control UI origins](#control-ui-origins) below) — required for WebSocket connections from the browser.
 
 ## One-click deploy
 
@@ -63,6 +64,36 @@ Set these variables on the service:
 - `OPENCLAW_GATEWAY_TOKEN` (required; treat as an admin secret)
 - `OPENCLAW_STATE_DIR=/data/.openclaw` (recommended)
 - `OPENCLAW_WORKSPACE_DIR=/data/workspace` (recommended)
+
+## Control UI origins
+
+Railway terminates TLS and proxies traffic to the container, so the browser connects from your public Railway domain — a non-loopback origin. The Gateway blocks WebSocket connections from origins not in its allowlist, which causes "origin not allowed" errors when opening the chat interface.
+
+Add your Railway domain to `gateway.controlUi.allowedOrigins` in `~/.openclaw/openclaw.json` (or `$OPENCLAW_STATE_DIR/openclaw.json` when `OPENCLAW_STATE_DIR` is set):
+
+```json5
+{
+  gateway: {
+    controlUi: {
+      enabled: true,
+      basePath: "/openclaw",
+      allowedOrigins: [
+        "https://<your-railway-domain>"
+      ]
+    }
+  }
+}
+```
+
+Replace `<your-railway-domain>` with your actual domain (e.g. `https://openclaw-production-1cec.up.railway.app`).
+
+You can apply this via the Control UI config editor at `https://<your-railway-domain>/openclaw` (Config tab), or by editing the config file directly in Railway's shell:
+
+```bash
+openclaw config set gateway.controlUi.allowedOrigins '["https://<your-railway-domain>"]'
+```
+
+After saving, the gateway picks up the change automatically (no restart required).
 
 ## Connect a channel
 
